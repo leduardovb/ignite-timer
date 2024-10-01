@@ -1,8 +1,7 @@
 import { CardHeader } from "@/components/ui/card";
 import Image from "next/image";
 import { HeaderNavItem } from "./header-nav-item";
-import { ClockIcon } from "@/assets/icons/clock.icon";
-import { HistoryIcon } from "@/assets/icons/history.icon";
+import { ScrollText, Timer } from "lucide-react";
 
 export function Header() {
   return (
@@ -10,10 +9,10 @@ export function Header() {
       <Image src="/logo.svg" alt="Logo" width={40} height={40} priority />
       <nav className="flex items-center space-x-2">
         <HeaderNavItem href="/">
-          <ClockIcon />
+          <Timer size={22} />
         </HeaderNavItem>
         <HeaderNavItem href="/history">
-          <HistoryIcon />
+          <ScrollText size={22} />
         </HeaderNavItem>
       </nav>
     </CardHeader>

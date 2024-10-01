@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 
 const RobotoFont = Roboto({
   weight: ["400", "700"],
+  subsets: ["latin"],
+});
+
+const RobotoMonoFont = Roboto_Mono({
+  weight: ["700"],
   subsets: ["latin"],
 });
 
@@ -18,7 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${RobotoFont.className} antialiased`}>{children}</body>
+      <body className={`${RobotoFont.className} dark antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }

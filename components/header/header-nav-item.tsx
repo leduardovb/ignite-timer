@@ -21,7 +21,11 @@ export function HeaderNavItem({
       <Button
         size={"icon"}
         variant={"ghost"}
-        className={cn(isActive ? "text-primary" : "text-primary-foreground")}
+        className={cn(
+          isActive
+            ? "text-primary hover:text-primary/90"
+            : "text-primary-foreground",
+        )}
       >
         {children}
       </Button>
