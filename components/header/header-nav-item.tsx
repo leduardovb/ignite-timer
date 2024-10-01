@@ -17,7 +17,7 @@ export function HeaderNavItem({
   const isActive = pathname === href;
 
   return (
-    <Link href={href}>
+    <Link href={href} className="flex items-center justify-center">
       <Button
         size={"icon"}
         variant={"ghost"}
