@@ -3,14 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
 
-export function AppProjectStepper() {
-  const [value, setValue] = useState(0);
+interface Props {
+  value: number;
+  onChange: (value: number) => void;
+}
 
-  const increment = () => setValue((prev) => prev + 1);
+export function AppProjectStepper(props: Props) {
+  const { value, onChange } = props;
 
-  const decrement = () => setValue((prev) => (prev ? prev - 1 : 0));
+  const increment = () => onChange(value + 1);
+
+  const decrement = () => onChange(value ? value - 1 : 0);
 
   return (
     <div className="mx-2 flex h-10 items-center gap-x-2 border-b-2 border-gray-600 px-1 text-lg font-bold text-gray-600">
