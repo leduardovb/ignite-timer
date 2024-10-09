@@ -32,7 +32,6 @@ export function AppCountdown() {
 
     if (currentSeconds <= 0 && activeCycle?.id) {
       const sound = new Audio("/audios/alarm-digital.mp3");
-      sound.loop = true;
       sound.play();
 
       completeCycle(activeCycle.id);

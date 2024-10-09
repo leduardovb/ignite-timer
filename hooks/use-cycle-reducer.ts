@@ -1,10 +1,13 @@
 "use client";
 
+import { getActiveCycleInStorage } from "@/lib/get-active-cycle-in-storage";
+import { getCyclesInStorage } from "@/lib/get-cycles-in-storage";
 import { makePageTitle } from "@/lib/make-page-title";
-import { useCallback, useReducer } from "react";
+import { saveCycleInStorage } from "@/lib/save-cycle-in-storage";
+import { useCallback, useEffect, useReducer } from "react";
 import { v4 as uuid } from "uuid";
 
-type Cycle = {
+export type Cycle = {
   id: string;
   task: string;
   createdAt: Date;
@@ -28,7 +31,17 @@ type StopCycleAction = {
   id: string;
 };
 
-type Action = StartCycleAction | CompleteCycleAction | StopCycleAction;
+type LoadCyclesAction = {
+  type: "LOAD_CYCLES";
+  cycles: Array<Cycle>;
+  activeCycle: Cycle | null;
+};
+
+type Action =
+  | StartCycleAction
+  | CompleteCycleAction
+  | StopCycleAction
+  | LoadCyclesAction;
 
 type State = {
   cycles: Array<Cycle>;
@@ -64,11 +77,13 @@ const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         activeCycle: null,
-        cycles: state.cycles.map((project) =>
-          project.id === action.id
-            ? { ...project, status: "completed" }
-            : project,
-        ),
+        cycles: state.cycles.map((project) => {
+          if (project.id === action.id) {
+            saveCycleInStorage({ ...project, status: "completed" });
+            return { ...project, status: "completed" };
+          }
+          return project;
+        }),
       };
     case "STOP_CYCLE":
       document.title = "Ignite Timer";
@@ -76,11 +91,19 @@ const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         activeCycle: null,
-        cycles: state.cycles.map((project) =>
-          project.id === action.id
-            ? { ...project, status: "stopped" }
-            : project,
-        ),
+        cycles: state.cycles.map((project) => {
+          if (project.id === action.id) {
+            saveCycleInStorage({ ...project, status: "stopped" });
+            return { ...project, status: "stopped" };
+          }
+          return project;
+        }),
+      };
+    case "LOAD_CYCLES":
+      return {
+        ...state,
+        cycles: action.cycles,
+        activeCycle: action.activeCycle,
       };
     default:
       return state;
@@ -109,6 +132,19 @@ export function useCycleReducer(): CycleReducer {
   const stopCycle = useCallback((id: string) => {
     dispatch({ type: "STOP_CYCLE", id });
   }, []);
+
+  useEffect(() => {
+    const cycles = getCyclesInStorage();
+    const activeCycle = getActiveCycleInStorage();
+    dispatch({ type: "LOAD_CYCLES", cycles, activeCycle });
+  }, []);
+
+  useEffect(() => {
+    if (!state.activeCycle) return;
+
+    const newCycle = state.activeCycle;
+    saveCycleInStorage(newCycle);
+  }, [state.activeCycle]);
 
   return {
     cycles: state.cycles,
