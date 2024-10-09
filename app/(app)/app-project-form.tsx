@@ -27,6 +27,9 @@ export function AppProjectForm({ children }: React.PropsWithChildren) {
   const hasErrors = !!(formState.errors.minutesAmount || formState.errors.task);
 
   const onSubmit = (data: StartTask) => {
+    const sound = new Audio("/audios/button.mp3");
+    sound.play();
+
     if (activeCycle) {
       stopCycle(activeCycle.id);
     } else {
