@@ -7,37 +7,45 @@ import { CountdownSeparator } from "@/components/countdown/countdown-separator";
 import { useCycle } from "@/hooks/use-cycle";
 import { useEffect, useState } from "react";
 import { differenceInSeconds } from "date-fns";
+import { makePageTitle } from "@/lib/make-page-title";
+import { calcMinutesAndSeconds } from "@/lib/calc-minutes-and-seconds";
 
 export function AppCountdown() {
   const { activeProject, stopProject } = useCycle();
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
 
-  const totalSeconds = activeProject ? activeProject.minutesAmount * 60 : 0;
-  const currentSeconds = totalSeconds - amountSecondsPassed;
+  const minutesAmount = activeProject?.minutesAmount || 0;
 
-  const minutesAmount = Math.floor(currentSeconds / 60);
-  const secondsAmount = currentSeconds % 60;
-
-  const minutes = minutesAmount.toString().padStart(2, "0");
-  const seconds = secondsAmount.toString().padStart(2, "0");
+  const { minutes, seconds } = calcMinutesAndSeconds(
+    minutesAmount,
+    amountSecondsPassed,
+  );
 
   useEffect(() => {
     if (!activeProject) setAmountSecondsPassed(0);
   }, [activeProject]);
 
   useEffect(() => {
+    const currentSeconds = minutesAmount * 60 - amountSecondsPassed;
+
     if (currentSeconds <= 0 && activeProject?.id) {
       stopProject(activeProject.id);
     }
-  }, [activeProject?.id, currentSeconds, stopProject]);
+  }, [activeProject?.id, amountSecondsPassed, minutesAmount, stopProject]);
 
   useEffect(() => {
     if (!activeProject) return;
 
     const interval = setInterval(() => {
-      setAmountSecondsPassed(
-        differenceInSeconds(new Date(), activeProject.createdAt),
+      const diff = differenceInSeconds(new Date(), activeProject.createdAt);
+
+      document.title = makePageTitle(
+        activeProject.minutesAmount,
+        diff,
+        activeProject.task,
       );
+
+      setAmountSecondsPassed(diff);
     }, 1000);
 
     return () => clearInterval(interval);

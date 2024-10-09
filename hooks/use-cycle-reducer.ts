@@ -1,5 +1,6 @@
 "use client";
 
+import { makePageTitle } from "@/lib/make-page-title";
 import { useCallback, useReducer } from "react";
 import { v4 as uuid } from "uuid";
 
@@ -50,12 +51,16 @@ const reducer = (state: State, action: Action): State => {
         minutesAmount: action.minutesAmount,
       };
 
+      document.title = makePageTitle(action.minutesAmount, 0, action.task);
+
       return {
         ...state,
         activeCycle: newProject,
         cycles: [...state.cycles, newProject],
       };
     case "COMPLETE_CYCLE":
+      document.title = "Ignite Timer";
+
       return {
         ...state,
         activeCycle: null,
@@ -66,6 +71,8 @@ const reducer = (state: State, action: Action): State => {
         ),
       };
     case "STOP_CYCLE":
+      document.title = "Ignite Timer";
+
       return {
         ...state,
         activeCycle: null,
