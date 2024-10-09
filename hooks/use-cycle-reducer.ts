@@ -8,8 +8,8 @@ type Cycle = {
   id: string;
   task: string;
   createdAt: Date;
-  isCompleted: boolean;
   minutesAmount: number;
+  status: "completed" | "stopped" | "running";
 };
 
 type StartCycleAction = {
@@ -43,10 +43,10 @@ const initialState: State = {
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "START_CYCLE":
-      const newProject = {
+      const newCycle: Cycle = {
         id: uuid(),
+        status: "running",
         task: action.task,
-        isCompleted: false,
         createdAt: new Date(),
         minutesAmount: action.minutesAmount,
       };
@@ -55,8 +55,8 @@ const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        activeCycle: newProject,
-        cycles: [...state.cycles, newProject],
+        activeCycle: newCycle,
+        cycles: [newCycle, ...state.cycles],
       };
     case "COMPLETE_CYCLE":
       document.title = "Ignite Timer";
@@ -66,7 +66,7 @@ const reducer = (state: State, action: Action): State => {
         activeCycle: null,
         cycles: state.cycles.map((project) =>
           project.id === action.id
-            ? { ...project, isCompleted: true }
+            ? { ...project, status: "completed" }
             : project,
         ),
       };
@@ -78,7 +78,7 @@ const reducer = (state: State, action: Action): State => {
         activeCycle: null,
         cycles: state.cycles.map((project) =>
           project.id === action.id
-            ? { ...project, isCompleted: false }
+            ? { ...project, status: "stopped" }
             : project,
         ),
       };
@@ -88,33 +88,33 @@ const reducer = (state: State, action: Action): State => {
 };
 
 export type CycleReducer = {
-  projects: Array<Cycle>;
-  activeProject: Cycle | null;
-  startProject: (task: string, minutesAmount: number) => void;
-  completeProject: (id: string) => void;
-  stopProject: (id: string) => void;
+  cycles: Array<Cycle>;
+  activeCycle: Cycle | null;
+  startCycle: (task: string, minutesAmount: number) => void;
+  completeCycle: (id: string) => void;
+  stopCycle: (id: string) => void;
 };
 
 export function useCycleReducer(): CycleReducer {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const startProject = useCallback((task: string, minutesAmount: number) => {
+  const startCycle = useCallback((task: string, minutesAmount: number) => {
     dispatch({ type: "START_CYCLE", task, minutesAmount });
   }, []);
 
-  const completeProject = useCallback((id: string) => {
+  const completeCycle = useCallback((id: string) => {
     dispatch({ type: "COMPLETE_CYCLE", id });
   }, []);
 
-  const stopProject = useCallback((id: string) => {
+  const stopCycle = useCallback((id: string) => {
     dispatch({ type: "STOP_CYCLE", id });
   }, []);
 
   return {
-    projects: state.cycles,
-    activeProject: state.activeCycle,
-    startProject,
-    completeProject,
-    stopProject,
+    cycles: state.cycles,
+    activeCycle: state.activeCycle,
+    startCycle,
+    completeCycle,
+    stopCycle,
   };
 }

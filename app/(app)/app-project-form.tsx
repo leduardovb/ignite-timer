@@ -18,19 +18,19 @@ import { useCycle } from "@/hooks/use-cycle";
 import { HandPalmIcon } from "@/assets/icons/hand-palm.icon";
 
 export function AppProjectForm({ children }: React.PropsWithChildren) {
-  const { activeProject, startProject, stopProject } = useCycle();
+  const { activeCycle, startCycle, stopCycle } = useCycle();
   const { handleSubmit, register, control, formState, reset } =
     useForm<StartTask>({
       defaultValues: { task: "", minutesAmount: 0 },
-      resolver: activeProject ? undefined : zodResolver(StartTaskSchema),
+      resolver: activeCycle ? undefined : zodResolver(StartTaskSchema),
     });
   const hasErrors = !!(formState.errors.minutesAmount || formState.errors.task);
 
   const onSubmit = (data: StartTask) => {
-    if (activeProject) {
-      stopProject(activeProject.id);
+    if (activeCycle) {
+      stopCycle(activeCycle.id);
     } else {
-      startProject(data.task, data.minutesAmount);
+      startCycle(data.task, data.minutesAmount);
       reset({
         task: "",
         minutesAmount: 0,
@@ -63,10 +63,10 @@ export function AppProjectForm({ children }: React.PropsWithChildren) {
           <TooltipTrigger asChild>
             <Button
               disabled={hasErrors}
-              variant={!activeProject ? undefined : "destructive"}
+              variant={!activeCycle ? undefined : "destructive"}
               className="h-[3.5rem] w-full gap-x-2 text-base font-bold"
             >
-              {!!activeProject ? (
+              {!!activeCycle ? (
                 <>
                   <HandPalmIcon />
                   Interromper
