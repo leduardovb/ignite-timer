@@ -11,10 +11,12 @@ import { makePageTitle } from "@/lib/make-page-title";
 import { calcMinutesAndSeconds } from "@/lib/calc-minutes-and-seconds";
 
 export function AppCountdown() {
-  const { activeProject, stopProject } = useCycle();
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
+  const { activeCycle, completeCycle } = useCycle();
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(
+    activeCycle ? differenceInSeconds(new Date(), activeCycle.createdAt) : 0,
+  );
 
-  const minutesAmount = activeProject?.minutesAmount || 0;
+  const minutesAmount = activeCycle?.minutesAmount || 0;
 
   const { minutes, seconds } = calcMinutesAndSeconds(
     minutesAmount,
@@ -22,34 +24,34 @@ export function AppCountdown() {
   );
 
   useEffect(() => {
-    if (!activeProject) setAmountSecondsPassed(0);
-  }, [activeProject]);
+    if (!activeCycle) setAmountSecondsPassed(0);
+  }, [activeCycle]);
 
   useEffect(() => {
     const currentSeconds = minutesAmount * 60 - amountSecondsPassed;
 
-    if (currentSeconds <= 0 && activeProject?.id) {
-      stopProject(activeProject.id);
+    if (currentSeconds <= 0 && activeCycle?.id) {
+      completeCycle(activeCycle.id);
     }
-  }, [activeProject?.id, amountSecondsPassed, minutesAmount, stopProject]);
+  }, [activeCycle?.id, amountSecondsPassed, minutesAmount, completeCycle]);
 
   useEffect(() => {
-    if (!activeProject) return;
+    if (!activeCycle) return;
 
     const interval = setInterval(() => {
-      const diff = differenceInSeconds(new Date(), activeProject.createdAt);
+      const diff = differenceInSeconds(new Date(), activeCycle.createdAt);
 
       document.title = makePageTitle(
-        activeProject.minutesAmount,
+        activeCycle.minutesAmount,
         diff,
-        activeProject.task,
+        activeCycle.task,
       );
 
       setAmountSecondsPassed(diff);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeProject]);
+  }, [activeCycle]);
 
   return (
     <Countdown>

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -7,10 +9,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { HistoryStatus } from "./history-status";
+import { useCycle } from "@/hooks/use-cycle";
+import { formatDate } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function HistoryPage() {
+  const { cycles } = useCycle();
+
   return (
-    <div className="flex overflow-auto">
+    <div
+      className={cn(
+        "flex h-full overflow-auto",
+        !cycles.length && "rounded-t-lg bg-[#29292E]",
+      )}
+    >
       <Table>
         <TableHeader>
           <TableRow>
@@ -21,13 +33,15 @@ export default function HistoryPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: 10 }).map((_, index) => (
-            <TableRow key={index}>
-              <TableCell>Desenvolver o layout da página</TableCell>
-              <TableCell>4 horas</TableCell>
-              <TableCell>10/10/2021</TableCell>
+          {cycles.map((project) => (
+            <TableRow key={project.id}>
+              <TableCell>{project.task}</TableCell>
+              <TableCell>{project.minutesAmount} minuto(s)</TableCell>
               <TableCell>
-                <HistoryStatus status="completed" />
+                {formatDate(project.createdAt, "dd/MM/yyyy")}
+              </TableCell>
+              <TableCell>
+                <HistoryStatus status={project.status} />
               </TableCell>
             </TableRow>
           ))}
