@@ -10,5 +10,5 @@ export const makePageTitle = (
     amountSecondsPassed,
   );
 
-  return `🍅 ${minutes}:${seconds} - ${task}`;
+  return `${minutes}:${seconds} - ${task}`;
 };

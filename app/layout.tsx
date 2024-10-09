@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Roboto, Roboto_Mono } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 
 const RobotoFont = Roboto({
   weight: ["400", "700"],
-  subsets: ["latin"],
-});
-
-const RobotoMonoFont = Roboto_Mono({
-  weight: ["700"],
   subsets: ["latin"],
 });
 
