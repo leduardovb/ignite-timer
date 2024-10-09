@@ -4,8 +4,6 @@ import { PlayIcon } from "@/assets/icons/play.icon";
 import { Button } from "@/components/ui/button";
 import { AppProjectAutocomplete } from "./app-project-autocomplete";
 import { AppProjectStepper } from "./app-project-stepper";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { StartTask, StartTaskSchema } from "@/lib/zod/start-task.schema";
 import {
   Tooltip,
@@ -14,15 +12,31 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCycle } from "@/hooks/use-cycle";
+import { HandPalmIcon } from "@/assets/icons/hand-palm.icon";
 
 export function AppProjectForm({ children }: React.PropsWithChildren) {
-  const { handleSubmit, register, control, formState } = useForm<StartTask>({
-    defaultValues: { task: "", minutesAmount: 0 },
-    resolver: zodResolver(StartTaskSchema),
-  });
-  const hasErrors = !formState.isValid && formState.isSubmitted;
+  const { activeProject, startProject, stopProject } = useCycle();
+  const { handleSubmit, register, control, formState, reset } =
+    useForm<StartTask>({
+      defaultValues: { task: "", minutesAmount: 0 },
+      resolver: activeProject ? undefined : zodResolver(StartTaskSchema),
+    });
+  const hasErrors = !!(formState.errors.minutesAmount || formState.errors.task);
 
-  const onSubmit = (data: StartTask) => {};
+  const onSubmit = (data: StartTask) => {
+    if (activeProject) {
+      stopProject(activeProject.id);
+    } else {
+      startProject(data.task, data.minutesAmount);
+      reset({
+        task: "",
+        minutesAmount: 0,
+      });
+    }
+  };
 
   return (
     <form
@@ -49,12 +63,23 @@ export function AppProjectForm({ children }: React.PropsWithChildren) {
           <TooltipTrigger asChild>
             <Button
               disabled={hasErrors}
-              className="h-[3.5rem] w-full gap-x-2 text-base font-bold hover:bg-green-900"
+              variant={!activeProject ? undefined : "destructive"}
+              className="h-[3.5rem] w-full gap-x-2 text-base font-bold"
             >
-              <PlayIcon />
-              Começar
+              {!!activeProject ? (
+                <>
+                  <HandPalmIcon />
+                  Interromper
+                </>
+              ) : (
+                <>
+                  <PlayIcon />
+                  Começar
+                </>
+              )}
             </Button>
           </TooltipTrigger>
+
           <TooltipContent>
             {formState.errors.task && (
               <div>{formState.errors.task.message}</div>
