@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/table";
 import { HistoryStatus } from "./history-status";
 import { useCycle } from "@/hooks/use-cycle";
-import { formatDate } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ptBR } from "date-fns/locale";
 
 export default function HistoryPage() {
   const { cycles } = useCycle();
@@ -38,7 +39,10 @@ export default function HistoryPage() {
               <TableCell>{project.task}</TableCell>
               <TableCell>{project.minutesAmount} minuto(s)</TableCell>
               <TableCell>
-                {formatDate(project.createdAt, "dd/MM/yyyy")}
+                {formatDistanceToNow(project.createdAt, {
+                  addSuffix: true,
+                  locale: ptBR,
+                })}
               </TableCell>
               <TableCell>
                 <HistoryStatus status={project.status} />

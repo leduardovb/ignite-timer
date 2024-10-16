@@ -1,11 +1,15 @@
 "use client";
 
-import { getActiveCycleInStorage } from "@/lib/get-active-cycle-in-storage";
-import { getCyclesInStorage } from "@/lib/get-cycles-in-storage";
 import { makePageTitle } from "@/lib/make-page-title";
-import { saveCycleInStorage } from "@/lib/save-cycle-in-storage";
+import { saveCyclesInStorage } from "@/lib/save-cycle-in-storage";
+import { saveCycleInCookies } from "@/lib/save-cycles-in-cookies";
 import { useCallback, useEffect, useReducer } from "react";
 import { v4 as uuid } from "uuid";
+
+interface UseCycleReducerProps {
+  initialCycles: Array<Cycle>;
+  initialActiveCycle: Cycle | null;
+}
 
 export type Cycle = {
   id: string;
@@ -79,7 +83,6 @@ const reducer = (state: State, action: Action): State => {
         activeCycle: null,
         cycles: state.cycles.map((project) => {
           if (project.id === action.id) {
-            saveCycleInStorage({ ...project, status: "completed" });
             return { ...project, status: "completed" };
           }
           return project;
@@ -93,7 +96,6 @@ const reducer = (state: State, action: Action): State => {
         activeCycle: null,
         cycles: state.cycles.map((project) => {
           if (project.id === action.id) {
-            saveCycleInStorage({ ...project, status: "stopped" });
             return { ...project, status: "stopped" };
           }
           return project;
@@ -118,8 +120,15 @@ export type CycleReducer = {
   stopCycle: (id: string) => void;
 };
 
-export function useCycleReducer(): CycleReducer {
-  const [state, dispatch] = useReducer(reducer, initialState);
+export function useCycleReducer({
+  initialCycles,
+  initialActiveCycle,
+}: UseCycleReducerProps): CycleReducer {
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    cycles: initialCycles,
+    activeCycle: initialActiveCycle,
+  });
 
   const startCycle = useCallback((task: string, minutesAmount: number) => {
     dispatch({ type: "START_CYCLE", task, minutesAmount });
@@ -134,17 +143,9 @@ export function useCycleReducer(): CycleReducer {
   }, []);
 
   useEffect(() => {
-    const cycles = getCyclesInStorage();
-    const activeCycle = getActiveCycleInStorage();
-    dispatch({ type: "LOAD_CYCLES", cycles, activeCycle });
-  }, []);
-
-  useEffect(() => {
-    if (!state.activeCycle) return;
-
-    const newCycle = state.activeCycle;
-    saveCycleInStorage(newCycle);
-  }, [state.activeCycle]);
+    saveCyclesInStorage(state.cycles);
+    saveCycleInCookies(state.cycles);
+  }, [state.cycles]);
 
   return {
     cycles: state.cycles,
